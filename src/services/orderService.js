@@ -2,6 +2,7 @@ const db = require('../db/client');
 const userRepository = require('../db/repositories/userRepository');
 const cartRepository = require('../db/repositories/cartRepository');
 const productRepository = require('../db/repositories/productRepository');
+const orderRepository = require('../db/repositories/orderRepository');
 
 class OrderService {
   constructor(fallbackOrderEngine) {
@@ -114,6 +115,11 @@ class OrderService {
   async getProductById(businessId, productId) {
     if (!db.isDbEnabled()) return null;
     return productRepository.getById(businessId, productId);
+  }
+
+  async listOrders(businessId, limit = 50) {
+    if (!db.isDbEnabled()) return [];
+    return orderRepository.listByBusiness(businessId, limit);
   }
 }
 

@@ -10,6 +10,15 @@ function validateUserId(req, res, next) {
 }
 
 module.exports = function ordersRouter(orderEngine) {
+  router.get('/', async (req, res) => {
+    try {
+      const orders = await orderEngine.listOrders(req.businessId, Number(req.query.limit || 50));
+      return res.json({ success: true, orders });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  });
+
   router.get('/:userId/cart', validateUserId, async (req, res) => {
     try {
       const cart = await orderEngine.viewCart(req.businessId, req.params.userId);

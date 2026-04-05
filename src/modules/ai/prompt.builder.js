@@ -1,6 +1,7 @@
-function buildPrompt(brain, message, products = [], memory = { history: [] }) {
+function buildPrompt(brain, message, products = [], memory = { history: [] }, recommendations = []) {
   const safeProducts = Array.isArray(products) ? products : [];
   const safeHistory = Array.isArray(memory.history) ? memory.history : [];
+  const safeRecommendations = Array.isArray(recommendations) ? recommendations : [];
   const currency = (((brain || {}).business_context || {}).currency) || 'KES';
 
   return `You are a ${brain.identity.role}.
@@ -22,6 +23,9 @@ ${safeProducts.map(p => `${p.name} - ${currency} ${p.price}`).join('\n')}
 
 Conversation Memory:
 ${safeHistory.map(m => `${m.sender}: ${m.message}`).join('\n')}
+
+Recommendations:
+${safeRecommendations.map(p => `${p.name} - ${currency} ${p.price}`).join('\n')}
 
 IMPORTANT:
 Respond in JSON format:

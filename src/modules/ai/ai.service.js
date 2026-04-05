@@ -2,8 +2,15 @@ const https = require('https');
 const { buildPrompt } = require('./prompt.builder');
 const { parseAIResponse } = require('./response.parser');
 
-async function processMessage({ brain, message, products = [], memory = { history: [] }, openaiApiKey }) {
-  const prompt = buildPrompt(brain, message, products, memory);
+async function processMessage({
+  brain,
+  message,
+  products = [],
+  memory = { history: [] },
+  recommendations = [],
+  openaiApiKey,
+}) {
+  const prompt = buildPrompt(brain, message, products, memory, recommendations);
 
   if (!openaiApiKey) {
     return {

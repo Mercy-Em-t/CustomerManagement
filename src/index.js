@@ -15,11 +15,15 @@ const MemoryStore = require('./services/memoryStore');
 const OrderService = require('./services/orderService');
 const ProductService = require('./services/productService');
 const BrainAdminService = require('./services/brainAdminService');
+const AnalyticsService = require('./services/analyticsService');
+const ProductSyncService = require('./services/productSyncService');
 
 const chatRouter = require('./routes/chat');
 const ordersRouter = require('./routes/orders');
 const productsRouter = require('./routes/products');
 const brainRouter = require('./routes/brain');
+const analyticsRouter = require('./routes/analytics');
+const syncRouter = require('./routes/sync');
 const healthRouter = require('./routes/health');
 const webhooksRouter = require('./routes/webhooks');
 
@@ -41,6 +45,8 @@ const memoryStore = new MemoryStore(memoryEngine, config.maxConversationHistory)
 const orderService = new OrderService(fallbackOrderEngine);
 const productService = new ProductService();
 const brainAdminService = new BrainAdminService(brainLoader);
+const analyticsService = new AnalyticsService();
+const productSyncService = new ProductSyncService();
 const intentDetector = new IntentDetector();
 const orchestrator = new Orchestrator(
   brainLoader,
@@ -57,6 +63,8 @@ app.use('/api/chat', auth, chatRouter(orchestrator));
 app.use('/api/orders', auth, ordersRouter(orderService));
 app.use('/api/products', auth, productsRouter(productService));
 app.use('/api/brain', auth, brainRouter(brainAdminService));
+app.use('/api/analytics', auth, analyticsRouter(analyticsService));
+app.use('/api/sync', auth, syncRouter(productSyncService));
 app.use('/webhooks', webhooksRouter(orchestrator));
 
 // 404 handler

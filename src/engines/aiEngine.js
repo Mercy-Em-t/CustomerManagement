@@ -29,7 +29,7 @@ Respond ONLY with valid JSON in this format:
 {"response": "<your reply>", "intent": "<one of: ${SUPPORTED_INTENTS.join(', ')}>", "confidence": <0.0-1.0>, "entities": {}}`;
   }
 
-  async processMessage(brain, userMessage, conversationHistory) {
+  async processMessage(brain, userMessage, conversationHistory, products = [], recommendations = []) {
     const memory = {
       history: (conversationHistory || []).map((m) => ({
         sender: m.role === 'user' ? 'user' : 'assistant',
@@ -40,8 +40,9 @@ Respond ONLY with valid JSON in this format:
     const moduleResult = await aiService.processMessage({
       brain,
       message: userMessage,
-      products: [],
+      products,
       memory,
+      recommendations,
       openaiApiKey: config.openaiApiKey,
     });
 

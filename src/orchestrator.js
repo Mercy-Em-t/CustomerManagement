@@ -1,5 +1,6 @@
 const config = require('./config');
 const analyticsRepository = require('./db/repositories/analyticsRepository');
+const { recommendProducts } = require('./modules/recommendation/recommendation.service');
 
 class Orchestrator {
   constructor(brainLoader, aiEngine, orderEngine, memoryStore, intentDetector, productService) {
@@ -18,9 +19,22 @@ class Orchestrator {
     // 2. Get/create conversation context + history
     const context = await this.memoryStore.getOrCreateContext(businessId, userId);
     const history = await this.memoryStore.getHistory(context, userId, config.maxConversationHistory);
+    const products = this.productService ? await this.productService.listProducts(businessId) : [];
+    const existingCart = await this.orderEngine.viewCart(businessId, userId);
 
-    // 3. Send to AI engine
-    const aiOutput = await this.aiEngine.processMessage(brain, message, history);
+    // 3. Build recommendations and send to AI engine
+    const initialRecommendations = recommendProducts({
+      products,
+      cart: existingCart || { items: [], total: 0 },
+      intent: 'product_search',
+    });
+    const aiOutput = await this.aiEngine.processMessage(
+      brain,
+      message,
+      history,
+      products,
+      initialRecommendations
+    );
 
     // 4. Detect intent
     const intent = this.intentDetector.detect(aiOutput);
@@ -59,6 +73,12 @@ class Orchestrator {
       }
     }
 
+    const recommendations = recommendProducts({
+      products,
+      cart: cart || existingCart || { items: [], total: 0 },
+      intent,
+    });
+
     await analyticsRepository.trackIntent(businessId, intent, true);
 
     // 7. Return result
@@ -68,6 +88,7 @@ class Orchestrator {
       confidence: aiOutput.confidence || 1.0,
       entities,
       cart,
+      recommendations,
     };
   }
 }
