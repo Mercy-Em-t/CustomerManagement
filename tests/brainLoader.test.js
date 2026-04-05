@@ -43,6 +43,18 @@ describe('BrainLoader', () => {
     await expect(loader.loadBrain('nonexistent_business')).rejects.toThrow('Brain config not found');
   });
 
+  test('throws error when brain file contains invalid JSON', async () => {
+    const fs = require('fs').promises;
+    const path = require('path');
+    const badBrainPath = path.resolve(__dirname, '../brains/bad_json_brain.json');
+    await fs.writeFile(badBrainPath, '{ invalid json :::');
+    try {
+      await expect(loader.loadBrain('bad_json_brain')).rejects.toThrow();
+    } finally {
+      await fs.unlink(badBrainPath).catch(() => {});
+    }
+  });
+
   test('clearCache removes specific brain', async () => {
     await loader.loadBrain('demo_store');
     loader.clearCache('demo_store');

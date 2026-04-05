@@ -3,7 +3,7 @@ const router = express.Router();
 
 function validateUserId(req, res, next) {
   if (!/^[a-zA-Z0-9_-]+$/.test(req.params.userId)) {
-    return res.status(400).json({ error: 'Invalid user ID' });
+    return res.status(400).json({ error: 'Invalid user ID format. Only alphanumeric characters, underscores, and hyphens are allowed.' });
   }
   next();
 }

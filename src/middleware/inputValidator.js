@@ -7,11 +7,10 @@ const chatSchema = Joi.object({
 });
 
 function sanitizeInput(str) {
-  // Strip characters that could be used for prompt injection
   return str
-    .replace(/[`]/g, "'")
-    .replace(/\{|\}/g, '')
-    .replace(/<\|.*?\|>/g, '')
+    .replace(/[`]/g, "'")           // backticks can break code-block injection in prompts
+    .replace(/\{|\}/g, '')          // curly braces used in template-injection attacks
+    .replace(/<\|.*?\|>/g, '')      // special delimiters used by some LLM tokenizers (e.g. <|endoftext|>)
     .trim();
 }
 

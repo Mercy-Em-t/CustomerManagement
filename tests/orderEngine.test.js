@@ -75,4 +75,8 @@ describe('OrderEngine', () => {
   test('checkout throws error on empty cart', () => {
     expect(() => engine.checkout('user_empty')).toThrow('Cart is empty');
   });
+
+  test('updateQuantity throws error when item not in cart', () => {
+    expect(() => engine.updateQuantity('user1', 'nonexistent_prod', 3)).toThrow('Item not found in cart');
+  });
 });
