@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 module.exports = function productsRouter(productService) {
+  const readOnlyError = {
+    error: 'Products are read-only in API. Use sync endpoints (/api/sync/products or /api/sync/products/webhook).',
+  };
+
   router.get('/', async (req, res) => {
     try {
       const products = await productService.listProducts(req.businessId);
@@ -21,6 +25,22 @@ module.exports = function productsRouter(productService) {
     } catch (err) {
       res.status(500).json({ error: 'Internal server error' });
     }
+  });
+
+  router.post('/', (req, res) => {
+    return res.status(405).json(readOnlyError);
+  });
+
+  router.put('/:id', (req, res) => {
+    return res.status(405).json(readOnlyError);
+  });
+
+  router.patch('/:id', (req, res) => {
+    return res.status(405).json(readOnlyError);
+  });
+
+  router.delete('/:id', (req, res) => {
+    return res.status(405).json(readOnlyError);
   });
 
   return router;

@@ -46,6 +46,18 @@ describe('products + brain routes (DB disabled)', () => {
     expect(res.body.products).toHaveLength(0);
   });
 
+  test('POST /api/products is read-only and rejected', async () => {
+    const app = buildApp();
+    const res = await request(app)
+      .post('/api/products')
+      .set('x-api-key', 'secure_key')
+      .set('x-business-id', 'my_shop')
+      .send({ name: 'New Product' });
+
+    expect(res.status).toBe(405);
+    expect(res.body.error).toContain('read-only');
+  });
+
   test('GET /api/brain returns fallback brain metadata', async () => {
     const app = buildApp();
     const res = await request(app)
@@ -85,6 +97,8 @@ describe('products + brain routes (DB disabled)', () => {
     expect(res.body.summary).toEqual({
       topIntents: [],
       conversionRate: 0,
+      topProducts: [],
+      ordersCount: 0,
     });
   });
 

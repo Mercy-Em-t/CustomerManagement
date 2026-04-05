@@ -67,6 +67,20 @@ app.use('/api/analytics', auth, analyticsRouter(analyticsService));
 app.use('/api/sync', auth, syncRouter(productSyncService));
 app.use('/webhooks', webhooksRouter(orchestrator));
 
+if (config.productSyncIntervalSeconds > 0) {
+  const intervalMs = config.productSyncIntervalSeconds * 1000;
+  setInterval(async () => {
+    try {
+      const result = await productSyncService.syncScheduledBusinesses();
+      if (!result.skipped) {
+        console.log(`Scheduled sync complete: triggered=${result.triggered}`);
+      }
+    } catch (err) {
+      console.error('Scheduled sync loop failed:', err.message);
+    }
+  }, intervalMs);
+}
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });

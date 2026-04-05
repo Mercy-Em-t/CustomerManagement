@@ -80,6 +80,10 @@ Key variables:
 | `WHATSAPP_DEFAULT_BUSINESS_ID` | Fallback tenant if map misses | — |
 | `WEBHOOK_DEDUPE_TTL_SECONDS` | Webhook idempotency TTL in seconds | `300` |
 | `WHATSAPP_API_VERSION` | Graph API version for WhatsApp endpoint | `v20.0` |
+| `PRODUCT_SYNC_INTERVAL_SECONDS` | Scheduled sync interval for businesses using `scheduled` mode | `300` |
+| `PRODUCT_SYNC_TIMEOUT_MS` | Timeout per external product sync request | `10000` |
+| `PRODUCT_SYNC_RETRY_COUNT` | Number of retries for failed external sync calls | `2` |
+| `PRODUCT_SYNC_RETRY_BASE_MS` | Base backoff duration for sync retries | `500` |
 
 ### Running
 
@@ -142,7 +146,8 @@ Send a customer message and receive an AI response.
   "success": true,
   "response": "Yes! We carry organic chia seeds in 250g and 500g packs...",
   "intent": "product_search",
-  "cart": null
+  "cart": null,
+  "recommendations": []
 }
 ```
 
@@ -174,13 +179,46 @@ List products for the authenticated business.
 
 Get a single product for the authenticated business.
 
+> Product catalog is **read-only** via `/api/products`; mutations must happen through sync endpoints.
+
 ### GET `/api/brain`
 
 Get brain metadata for the authenticated business.
 
 ### POST `/api/brain`
 
-Validate submitted brain configuration payload.
+Validate and save/publish submitted brain configuration payload.
+
+### GET `/api/sync/products/status`
+
+Get per-business sync status (`sync_mode`, `sync_status`, `sync_error`, `sync_last_synced_at`).
+
+### POST `/api/sync/products/mode`
+
+Set sync mode to `manual` or `scheduled`:
+
+```json
+{ "sync_mode": "scheduled" }
+```
+
+### POST `/api/sync/products/webhook`
+
+Push product catalog updates from external POS:
+
+```json
+{
+  "products": [
+    {
+      "id": "WELL-001",
+      "name": "Organic Chia Seeds 500g",
+      "price": 650,
+      "stock": 120,
+      "category": "superfoods",
+      "tags": ["weight-loss", "fiber"]
+    }
+  ]
+}
+```
 
 ### GET `/health`
 
@@ -306,6 +344,20 @@ Only push to `main` for live, verified releases.
 
 ### Connect a real LLM
 Set `OPENAI_API_KEY` in `.env`. The AI Engine will automatically use the OpenAI API instead of the built-in mock responses.
+
+### Inventory onboarding
+1. Use `/inventory/shop_inventory_template.csv` as the canonical CSV shape.
+2. Keep required columns: `external_id,name,price,stock,category`.
+3. Optional columns: `description,tags` (`tags` uses `|` separator).
+4. Import helper is available at `src/modules/sync/inventoryImport.js`.
+
+### Stress testing conversations
+Use `tests/stress_conversations.json` as a scripted pack of launch-critical conversation journeys with pass/fail expectations.
+
+### Deployment checklist (Railway + Vercel)
+- Backend (Railway): set DB + WhatsApp + sync env vars, run `npm run migrate`, verify `/health`.
+- Frontend (Vercel): set `VITE_API_BASE_URL`, `VITE_API_KEY`, `VITE_BUSINESS_ID`, `VITE_USER_ID`.
+- Smoke tests: API auth, `/api/sync/products`, WhatsApp webhook verification + message reply, analytics summary endpoint.
 
 ### Rollout Path (Design → Code)
 1. Set `DATABASE_URL` and run `npm run migrate`

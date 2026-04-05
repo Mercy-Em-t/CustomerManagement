@@ -17,6 +17,7 @@ export default function App() {
   const [orders, setOrders] = useState([]);
   const [summary, setSummary] = useState({ topIntents: [], conversionRate: 0 });
   const [brain, setBrain] = useState({});
+  const [syncStatus, setSyncStatus] = useState(null);
 
   async function sendMessage(text) {
     const userMessage = { sender: 'user', text };
@@ -39,7 +40,7 @@ export default function App() {
 
       const data = await res.json();
       const aiText = data.response || data.reply || 'Sorry, I could not process that.';
-      const aiMessage = { sender: 'ai', text: aiText };
+      const aiMessage = { sender: 'ai', text: aiText, recommendations: data.recommendations || [] };
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err) {
       setMessages((prev) => [...prev, { sender: 'ai', text: 'Network error. Please try again.' }]);
@@ -53,24 +54,27 @@ export default function App() {
       'x-business-id': BUSINESS_ID,
     };
 
-    const [productsRes, ordersRes, analyticsRes, brainRes] = await Promise.all([
+    const [productsRes, ordersRes, analyticsRes, brainRes, syncRes] = await Promise.all([
       fetch(`${API_BASE}/api/products`, { headers }),
       fetch(`${API_BASE}/api/orders`, { headers }),
       fetch(`${API_BASE}/api/analytics/summary`, { headers }),
       fetch(`${API_BASE}/api/brain`, { headers }),
+      fetch(`${API_BASE}/api/sync/products/status`, { headers }),
     ]);
 
-    const [productsData, ordersData, analyticsData, brainData] = await Promise.all([
+    const [productsData, ordersData, analyticsData, brainData, syncData] = await Promise.all([
       productsRes.json(),
       ordersRes.json(),
       analyticsRes.json(),
       brainRes.json(),
+      syncRes.json(),
     ]);
 
     setProducts(productsData.products || []);
     setOrders(ordersData.orders || []);
     setSummary((analyticsData && analyticsData.summary) || { topIntents: [], conversionRate: 0 });
     setBrain((brainData && brainData.brain) || {});
+    setSyncStatus((syncData && syncData.status) || null);
   }
 
   async function triggerSync() {
@@ -81,6 +85,19 @@ export default function App() {
         'x-api-key': API_KEY,
         'x-business-id': BUSINESS_ID,
       },
+    });
+    await fetchAdminData();
+  }
+
+  async function publishBrain(nextBrain) {
+    await fetch(`${API_BASE}/api/brain`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'x-business-id': BUSINESS_ID,
+      },
+      body: JSON.stringify(nextBrain),
     });
     await fetchAdminData();
   }
@@ -96,10 +113,10 @@ export default function App() {
         <button onClick={fetchAdminData}>Refresh Dashboard</button>
         <button onClick={triggerSync}>Sync Products</button>
       </div>
-      <ProductsTable products={products} />
+      <ProductsTable products={products} syncStatus={syncStatus} />
       <OrdersPanel orders={orders} />
       <AnalyticsPanel summary={summary} />
-      <BrainEditor brain={brain} />
+      <BrainEditor brain={brain} onPublish={publishBrain} />
     </div>
   );
 }

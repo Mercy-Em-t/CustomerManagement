@@ -1,0 +1,63 @@
+[
+  {
+    "id": "flow_weight_loss_discovery",
+    "messages": [
+      "What do you have for weight loss?",
+      "I prefer tea and under 500 KES"
+    ],
+    "expected": {
+      "intent_in": ["product_search", "recommendation"],
+      "must_include_any": ["tea", "weight", "budget"]
+    }
+  },
+  {
+    "id": "flow_usage_help",
+    "messages": [
+      "How do I cook chia seeds?"
+    ],
+    "expected": {
+      "intent_in": ["usage_help"],
+      "must_include_any": ["soak", "water", "chia"]
+    }
+  },
+  {
+    "id": "flow_add_to_cart",
+    "messages": [
+      "Add 2 packs of chia seeds"
+    ],
+    "expected": {
+      "intent_in": ["purchase"],
+      "cart_should_exist": true
+    }
+  },
+  {
+    "id": "flow_out_of_stock",
+    "messages": [
+      "Is moringa still in stock?"
+    ],
+    "expected": {
+      "intent_in": ["product_search", "recommendation"],
+      "must_include_any": ["stock", "available", "alternative"]
+    }
+  },
+  {
+    "id": "flow_delivery_question",
+    "messages": [
+      "How long does delivery take to Nairobi?"
+    ],
+    "expected": {
+      "intent_in": ["logistics"],
+      "must_include_any": ["delivery", "days", "shipping"]
+    }
+  },
+  {
+    "id": "flow_complaint",
+    "messages": [
+      "I got the wrong product in my order"
+    ],
+    "expected": {
+      "intent_in": ["complaint"],
+      "must_include_any": ["sorry", "help", "resolve"]
+    }
+  }
+]
