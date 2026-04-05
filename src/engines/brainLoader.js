@@ -1,0 +1,56 @@
+const NodeCache = require('node-cache');
+const fs = require('fs').promises;
+const path = require('path');
+
+const REQUIRED_BRAIN_FIELDS = [
+  'identity',
+  'business_context',
+  'knowledge_scope',
+  'intent_map',
+  'response_rules',
+  'sales_strategy',
+  'conversation_patterns',
+];
+
+class BrainLoader {
+  constructor(cacheTTL = 300) {
+    this.cache = new NodeCache({ stdTTL: cacheTTL, useClones: false });
+  }
+
+  async loadBrain(businessId) {
+    const cached = this.cache.get(businessId);
+    if (cached) return cached;
+
+    const brainPath = path.resolve(__dirname, '../../brains', `${businessId}.json`);
+    let raw;
+    try {
+      raw = await fs.readFile(brainPath, 'utf8');
+    } catch (err) {
+      throw new Error(`Brain config not found for business: ${businessId}`);
+    }
+
+    const brain = JSON.parse(raw);
+    await this.validateBrain(brain);
+    this.cache.set(businessId, brain);
+    return brain;
+  }
+
+  async validateBrain(brain) {
+    for (const field of REQUIRED_BRAIN_FIELDS) {
+      if (!(field in brain)) {
+        throw new Error(`Brain config missing required field: ${field}`);
+      }
+    }
+    return true;
+  }
+
+  clearCache(businessId) {
+    if (businessId) {
+      this.cache.del(businessId);
+    } else {
+      this.cache.flushAll();
+    }
+  }
+}
+
+module.exports = BrainLoader;
