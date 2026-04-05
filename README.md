@@ -350,9 +350,19 @@ Set `OPENAI_API_KEY` in `.env`. The AI Engine will automatically use the OpenAI 
 2. Keep required columns: `external_id,name,price,stock,category`.
 3. Optional columns: `description,tags` (`tags` uses `|` separator).
 4. Import helper is available at `src/modules/sync/inventoryImport.js`.
+5. Shop 1 ready assets:
+   - Shop profile: `/config/shop_001.json`
+   - Catalog: `/inventory/shop_001_catalog.csv`
+   - Brain: `/brains/shop_001.json`
+
+### Quick messy-list conversion
+For fast onboarding text like:
+`chia seeds 300, pumpkin seeds 250, oats 150`
+
+Use `parseMessyProductList` from `src/modules/sync/inventoryImport.js` to convert into normalized, system-ready product objects.
 
 ### Stress testing conversations
-Use `tests/stress_conversations.json` as a scripted pack of launch-critical conversation journeys with pass/fail expectations.
+Use `tests/stress_conversations.json` as a scripted pack of launch-critical conversation journeys with explicit pass/fail criteria (discovery, usage, add-to-cart, upsell, checkout, out-of-stock, logistics, complaints).
 
 ### Deployment checklist (Railway + Vercel)
 - Backend (Railway): set DB + WhatsApp + sync env vars, run `npm run migrate`, verify `/health`.
