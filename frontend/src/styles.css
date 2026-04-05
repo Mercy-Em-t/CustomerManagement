@@ -37,3 +37,22 @@
 .input-box button {
   padding: 8px 12px;
 }
+
+.dashboard-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: left;
+}

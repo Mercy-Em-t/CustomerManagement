@@ -6,8 +6,12 @@ function buildApp() {
   const rateLimiter = require('../src/middleware/rateLimiter');
   const productsRouter = require('../src/routes/products');
   const brainRouter = require('../src/routes/brain');
+  const analyticsRouter = require('../src/routes/analytics');
+  const syncRouter = require('../src/routes/sync');
   const ProductService = require('../src/services/productService');
   const BrainAdminService = require('../src/services/brainAdminService');
+  const AnalyticsService = require('../src/services/analyticsService');
+  const ProductSyncService = require('../src/services/productSyncService');
   const BrainLoader = require('../src/engines/brainLoader');
 
   const app = express();
@@ -16,6 +20,8 @@ function buildApp() {
 
   app.use('/api/products', auth, productsRouter(new ProductService()));
   app.use('/api/brain', auth, brainRouter(new BrainAdminService(new BrainLoader(60))));
+  app.use('/api/analytics', auth, analyticsRouter(new AnalyticsService()));
+  app.use('/api/sync', auth, syncRouter(new ProductSyncService()));
 
   return app;
 }
@@ -65,5 +71,32 @@ describe('products + brain routes (DB disabled)', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toContain('missing required field');
+  });
+
+  test('GET /api/analytics/summary returns fallback summary when DB disabled', async () => {
+    const app = buildApp();
+    const res = await request(app)
+      .get('/api/analytics/summary')
+      .set('x-api-key', 'secure_key')
+      .set('x-business-id', 'my_shop');
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.summary).toEqual({
+      topIntents: [],
+      conversionRate: 0,
+    });
+  });
+
+  test('POST /api/sync/products returns skipped when DB disabled', async () => {
+    const app = buildApp();
+    const res = await request(app)
+      .post('/api/sync/products')
+      .set('x-api-key', 'secure_key')
+      .set('x-business-id', 'my_shop');
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.result.skipped).toBe(true);
   });
 });
