@@ -1,34 +1,29 @@
+const {
+  getOrCreateCart,
+  addItem: addModuleItem,
+  removeItem: removeModuleItem,
+  checkout: checkoutModuleCart,
+  recalculate,
+} = require('../modules/orders/order.service');
+
 class OrderEngine {
   constructor() {
-    this.carts = new Map();
+    this.carts = [];
   }
 
   getCart(userId) {
-    if (!this.carts.has(userId)) {
-      this.carts.set(userId, { items: [], status: 'active' });
-    }
-    return this.carts.get(userId);
+    return getOrCreateCart({ id: userId }, this.carts);
   }
 
   addItem(userId, product) {
     const cart = this.getCart(userId);
-    const existing = cart.items.find(i => i.product_id === product.product_id);
-    if (existing) {
-      existing.quantity += product.quantity || 1;
-    } else {
-      cart.items.push({
-        product_id: product.product_id,
-        name: product.name,
-        quantity: product.quantity || 1,
-        price: product.price,
-      });
-    }
+    addModuleItem(cart, product, product.quantity || 1);
     return cart;
   }
 
   removeItem(userId, productId) {
     const cart = this.getCart(userId);
-    cart.items = cart.items.filter(i => i.product_id !== productId);
+    removeModuleItem(cart, productId);
     return cart;
   }
 
@@ -40,6 +35,7 @@ class OrderEngine {
       return this.removeItem(userId, productId);
     }
     item.quantity = quantity;
+    recalculate(cart);
     return cart;
   }
 
@@ -55,18 +51,17 @@ class OrderEngine {
 
   checkout(userId) {
     const cart = this.getCart(userId);
-    if (cart.items.length === 0) {
-      throw new Error('Cart is empty');
-    }
+    const order = checkoutModuleCart(cart);
     const payload = {
-      orderId: `ORD-${Date.now()}-${userId}`,
+      orderId: `ORD-${order.order_id}`,
       items: [...cart.items],
-      total: this._calculateTotal(cart.items),
-      status: 'confirmed',
+      total: order.total,
+      status: order.status,
       createdAt: new Date().toISOString(),
     };
     cart.items = [];
-    cart.status = 'confirmed';
+    cart.status = 'active';
+    cart.total = 0;
     return payload;
   }
 

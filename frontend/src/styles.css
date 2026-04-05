@@ -1,0 +1,39 @@
+.app {
+  max-width: 420px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+}
+
+.chat-box {
+  height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  background: #fafafa;
+  margin-bottom: 10px;
+}
+
+.user {
+  text-align: right;
+  margin: 6px 0;
+}
+
+.ai {
+  text-align: left;
+  margin: 6px 0;
+}
+
+.input-box {
+  display: flex;
+  gap: 8px;
+}
+
+.input-box input {
+  flex: 1;
+  padding: 8px;
+}
+
+.input-box button {
+  padding: 8px 12px;
+}

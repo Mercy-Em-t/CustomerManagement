@@ -42,7 +42,14 @@ const orderService = new OrderService(fallbackOrderEngine);
 const productService = new ProductService();
 const brainAdminService = new BrainAdminService(brainLoader);
 const intentDetector = new IntentDetector();
-const orchestrator = new Orchestrator(brainLoader, aiEngine, orderService, memoryStore, intentDetector);
+const orchestrator = new Orchestrator(
+  brainLoader,
+  aiEngine,
+  orderService,
+  memoryStore,
+  intentDetector,
+  productService
+);
 
 // Routes
 app.use('/health', healthRouter);

@@ -1,5 +1,6 @@
 const SUPPORTED_INTENTS = require('./intentDetector').SUPPORTED_INTENTS;
 const config = require('../config');
+const aiService = require('../modules/ai/ai.service');
 
 class AIEngine {
   buildPrompt(brain, userMessage, conversationHistory) {
@@ -29,9 +30,30 @@ Respond ONLY with valid JSON in this format:
   }
 
   async processMessage(brain, userMessage, conversationHistory) {
-    if (config.openaiApiKey) {
-      return this._openAiResponse(brain, userMessage, conversationHistory, config.openaiApiKey);
+    const memory = {
+      history: (conversationHistory || []).map((m) => ({
+        sender: m.role === 'user' ? 'user' : 'assistant',
+        message: m.content,
+      })),
+    };
+
+    const moduleResult = await aiService.processMessage({
+      brain,
+      message: userMessage,
+      products: [],
+      memory,
+      openaiApiKey: config.openaiApiKey,
+    });
+
+    if (moduleResult && moduleResult.intent && moduleResult.intent !== 'unknown') {
+      return {
+        response: moduleResult.reply || moduleResult.response,
+        intent: moduleResult.intent,
+        confidence: moduleResult.confidence,
+        entities: moduleResult.entities || {},
+      };
     }
+
     return this._mockResponse(brain, userMessage);
   }
 
@@ -40,7 +62,7 @@ Respond ONLY with valid JSON in this format:
     const prompt = this.buildPrompt(brain, userMessage, conversationHistory);
 
     const body = JSON.stringify({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
     });

@@ -11,6 +11,14 @@ class ProductService {
     if (!db.isDbEnabled()) return null;
     return productRepository.getById(businessId, productId);
   }
+
+  async findByNameLike(businessId, productName) {
+    if (!db.isDbEnabled()) return null;
+    if (!productName || typeof productName !== 'string') return null;
+    const products = await productRepository.listByBusiness(businessId);
+    const needle = productName.toLowerCase();
+    return products.find((p) => String(p.name || '').toLowerCase().includes(needle)) || null;
+  }
 }
 
 module.exports = ProductService;

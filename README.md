@@ -91,6 +91,17 @@ npm run dev
 npm start
 ```
 
+### Frontend Chat UI (React + Vite)
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+Default frontend expects backend at `http://localhost:3000`.
+
 ### Database Migrations
 
 ```bash

@@ -2,12 +2,13 @@ const config = require('./config');
 const analyticsRepository = require('./db/repositories/analyticsRepository');
 
 class Orchestrator {
-  constructor(brainLoader, aiEngine, orderEngine, memoryStore, intentDetector) {
+  constructor(brainLoader, aiEngine, orderEngine, memoryStore, intentDetector, productService) {
     this.brainLoader = brainLoader;
     this.aiEngine = aiEngine;
     this.orderEngine = orderEngine;
     this.memoryStore = memoryStore;
     this.intentDetector = intentDetector;
+    this.productService = productService;
   }
 
   async handleMessage(businessId, userId, message) {
@@ -32,13 +33,30 @@ class Orchestrator {
 
     // 6. Handle purchase intent - add to cart if product entity present
     let cart = null;
-    if (intent === 'purchase' && entities.product_id) {
-      cart = await this.orderEngine.addItem(businessId, userId, {
-        product_id: entities.product_id,
-        name: entities.product_name || 'Product',
-        quantity: entities.quantity || 1,
-        price: entities.price || 0,
-      });
+    if (intent === 'purchase') {
+      let productPayload = null;
+      if (entities.product_id) {
+        productPayload = {
+          product_id: entities.product_id,
+          name: entities.product_name || 'Product',
+          quantity: entities.quantity || 1,
+          price: entities.price || 0,
+        };
+      } else if (this.productService && entities.product) {
+        const matchedProduct = await this.productService.findByNameLike(businessId, entities.product);
+        if (matchedProduct) {
+          productPayload = {
+            product_id: matchedProduct.id,
+            name: matchedProduct.name,
+            quantity: entities.quantity || 1,
+            price: Number(matchedProduct.price) || 0,
+          };
+        }
+      }
+
+      if (productPayload) {
+        cart = await this.orderEngine.addItem(businessId, userId, productPayload);
+      }
     }
 
     await analyticsRepository.trackIntent(businessId, intent, true);
