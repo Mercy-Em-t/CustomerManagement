@@ -1,5 +1,7 @@
 const db = require('../db/client');
 const businessRepository = require('../db/repositories/businessRepository');
+const fs = require('fs').promises;
+const path = require('path');
 
 class BrainAdminService {
   constructor(brainLoader) {
@@ -27,11 +29,16 @@ class BrainAdminService {
 
   async updateBrainConfig(businessId, brainConfig) {
     await this.brainLoader.validateBrain(brainConfig);
+    const brainsDir = path.resolve(__dirname, '../../brains');
+    const safeFileName = `${String(businessId).replace(/[^a-zA-Z0-9_-]/g, '')}.json`;
+    const brainPath = path.join(brainsDir, safeFileName);
+    await fs.writeFile(brainPath, `${JSON.stringify(brainConfig, null, 2)}\n`, 'utf8');
+    this.brainLoader.clearCache(businessId);
     return {
       business_id: businessId,
       valid: true,
-      updated: false,
-      note: 'Brain validation passed. Persisting config is file/db strategy dependent.',
+      updated: true,
+      note: 'Brain validation passed and config saved.',
     };
   }
 }

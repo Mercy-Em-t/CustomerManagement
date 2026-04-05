@@ -1,10 +1,15 @@
 const https = require('https');
 const db = require('../../db/client');
 const productRepository = require('../../db/repositories/productRepository');
+const config = require('../../config');
 
-function fetchJson(url, headers = {}) {
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function fetchJson(url, headers = {}, timeoutMs = config.productSyncTimeoutMs) {
   return new Promise((resolve, reject) => {
-    const req = https.request(url, { method: 'GET', headers }, (res) => {
+    const req = https.request(url, { method: 'GET', headers, timeout: timeoutMs }, (res) => {
       let data = '';
       res.on('data', (chunk) => (data += chunk));
       res.on('end', () => {
@@ -19,6 +24,9 @@ function fetchJson(url, headers = {}) {
       });
     });
     req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy(new Error('External sync request timed out'));
+    });
     req.end();
   });
 }
@@ -28,11 +36,25 @@ async function fetchExternalProducts(business) {
     throw new Error('Business external sync credentials missing');
   }
 
-  const payload = await fetchJson(business.external_api_url, {
-    Authorization: `Bearer ${business.external_api_key}`,
-  });
+  let lastError;
+  for (let attempt = 0; attempt <= config.productSyncRetryCount; attempt += 1) {
+    try {
+      const payload = await fetchJson(
+        business.external_api_url,
+        { Authorization: `Bearer ${business.external_api_key}` },
+        config.productSyncTimeoutMs
+      );
+      return Array.isArray(payload) ? payload : [];
+    } catch (err) {
+      lastError = err;
+      if (attempt < config.productSyncRetryCount) {
+        const delay = config.productSyncRetryBaseMs * (2 ** attempt);
+        await wait(delay);
+      }
+    }
+  }
 
-  return Array.isArray(payload) ? payload : [];
+  throw lastError || new Error('External sync failed');
 }
 
 async function upsertProduct(product, businessId) {

@@ -14,6 +14,7 @@ module.exports = function chatRouter(orchestrator) {
         response: result.response,
         intent: result.intent,
         cart: result.cart || null,
+        recommendations: result.recommendations || [],
       });
     } catch (err) {
       if (err.message && err.message.includes('Brain config not found')) {

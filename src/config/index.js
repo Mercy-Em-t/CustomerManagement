@@ -38,4 +38,8 @@ module.exports = {
   whatsappDefaultBusinessId: process.env.WHATSAPP_DEFAULT_BUSINESS_ID || '',
   webhookDedupeTtlSeconds: parseInt(process.env.WEBHOOK_DEDUPE_TTL_SECONDS, 10) || 300,
   whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v20.0',
+  productSyncIntervalSeconds: parseInt(process.env.PRODUCT_SYNC_INTERVAL_SECONDS, 10) || 300,
+  productSyncTimeoutMs: parseInt(process.env.PRODUCT_SYNC_TIMEOUT_MS, 10) || 10000,
+  productSyncRetryCount: parseInt(process.env.PRODUCT_SYNC_RETRY_COUNT, 10) || 2,
+  productSyncRetryBaseMs: parseInt(process.env.PRODUCT_SYNC_RETRY_BASE_MS, 10) || 500,
 };

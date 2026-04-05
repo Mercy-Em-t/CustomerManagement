@@ -29,9 +29,21 @@ module.exports = function webhooksRouter(orchestrator) {
       if (!inbound.length) return res.status(200).json({ success: true, ignored: true });
 
       for (const msg of inbound) {
-        const result = await orchestrator.handleMessage(msg.businessId, msg.userId, msg.message);
-        const responseText = (result && result.response) || 'Thanks! We received your message.';
-        await sendTextMessage(msg.userId, responseText);
+        if (!msg.businessId) {
+          const fallback = 'Thanks for your message. We are currently unavailable; please try again shortly.';
+          await sendTextMessage(msg.userId, fallback);
+          continue;
+        }
+
+        try {
+          const result = await orchestrator.handleMessage(msg.businessId, msg.userId, msg.message);
+          const responseText = (result && result.response) || 'Thanks! We received your message.';
+          await sendTextMessage(msg.userId, responseText);
+        } catch (err) {
+          console.error('Webhook per-message handling failure:', err.message);
+          const fallback = 'Thanks for your message. We are currently unavailable; please try again shortly.';
+          await sendTextMessage(msg.userId, fallback);
+        }
       }
 
       return res.status(200).json({ success: true, processed: inbound.length });

@@ -23,10 +23,17 @@ class Orchestrator {
     const existingCart = await this.orderEngine.viewCart(businessId, userId);
 
     // 3. Build recommendations and send to AI engine
+    const recommendationRules = {
+      priorityProductIds: (((brain || {}).sales_strategy || {}).priority_product_ids) || [],
+      excludedCategories: (((brain || {}).knowledge_scope || {}).excluded_categories) || [],
+      minStock: (((brain || {}).sales_strategy || {}).stock_thresholds || {}).min_recommendation_stock || 0,
+    };
+
     const initialRecommendations = recommendProducts({
       products,
       cart: existingCart || { items: [], total: 0 },
       intent: 'product_search',
+      rules: recommendationRules,
     });
     const aiOutput = await this.aiEngine.processMessage(
       brain,
@@ -77,6 +84,7 @@ class Orchestrator {
       products,
       cart: cart || existingCart || { items: [], total: 0 },
       intent,
+      rules: recommendationRules,
     });
 
     await analyticsRepository.trackIntent(businessId, intent, true);
