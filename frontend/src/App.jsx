@@ -18,6 +18,7 @@ export default function App() {
   const [summary, setSummary] = useState({ topIntents: [], conversionRate: 0 });
   const [brain, setBrain] = useState({});
   const [syncStatus, setSyncStatus] = useState(null);
+  const [systemManual, setSystemManual] = useState(null);
 
   async function sendMessage(text) {
     const userMessage = { sender: 'user', text };
@@ -54,20 +55,22 @@ export default function App() {
       'x-business-id': BUSINESS_ID,
     };
 
-    const [productsRes, ordersRes, analyticsRes, brainRes, syncRes] = await Promise.all([
+    const [productsRes, ordersRes, analyticsRes, brainRes, syncRes, manualRes] = await Promise.all([
       fetch(`${API_BASE}/api/products`, { headers }),
       fetch(`${API_BASE}/api/orders`, { headers }),
       fetch(`${API_BASE}/api/analytics/summary`, { headers }),
       fetch(`${API_BASE}/api/brain`, { headers }),
       fetch(`${API_BASE}/api/sync/products/status`, { headers }),
+      fetch(`${API_BASE}/api/system-admin/manual`, { headers }),
     ]);
 
-    const [productsData, ordersData, analyticsData, brainData, syncData] = await Promise.all([
+    const [productsData, ordersData, analyticsData, brainData, syncData, manualData] = await Promise.all([
       productsRes.json(),
       ordersRes.json(),
       analyticsRes.json(),
       brainRes.json(),
       syncRes.json(),
+      manualRes.json(),
     ]);
 
     setProducts(productsData.products || []);
@@ -75,6 +78,7 @@ export default function App() {
     setSummary((analyticsData && analyticsData.summary) || { topIntents: [], conversionRate: 0 });
     setBrain((brainData && brainData.brain) || {});
     setSyncStatus((syncData && syncData.status) || null);
+    setSystemManual((manualData && manualData.manual) || null);
   }
 
   async function triggerSync() {
@@ -117,6 +121,14 @@ export default function App() {
       <OrdersPanel orders={orders} />
       <AnalyticsPanel summary={summary} />
       <BrainEditor brain={brain} onPublish={publishBrain} />
+      <div>
+        <h3>System Admin Manual</h3>
+        {systemManual ? (
+          <pre className="admin-manual">{systemManual.content}</pre>
+        ) : (
+          <p>Click "Refresh Dashboard" to load manual.</p>
+        )}
+      </div>
     </div>
   );
 }

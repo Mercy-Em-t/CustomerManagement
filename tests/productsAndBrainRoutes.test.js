@@ -8,6 +8,7 @@ function buildApp() {
   const brainRouter = require('../src/routes/brain');
   const analyticsRouter = require('../src/routes/analytics');
   const syncRouter = require('../src/routes/sync');
+  const systemAdminRouter = require('../src/routes/systemAdmin');
   const ProductService = require('../src/services/productService');
   const BrainAdminService = require('../src/services/brainAdminService');
   const AnalyticsService = require('../src/services/analyticsService');
@@ -22,6 +23,7 @@ function buildApp() {
   app.use('/api/brain', auth, brainRouter(new BrainAdminService(new BrainLoader(60))));
   app.use('/api/analytics', auth, analyticsRouter(new AnalyticsService()));
   app.use('/api/sync', auth, syncRouter(new ProductSyncService()));
+  app.use('/api/system-admin', auth, systemAdminRouter());
 
   return app;
 }
@@ -112,5 +114,20 @@ describe('products + brain routes (DB disabled)', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.result.skipped).toBe(true);
+  });
+
+  test('GET /api/system-admin/manual returns user manual payload', async () => {
+    const app = buildApp();
+    const res = await request(app)
+      .get('/api/system-admin/manual')
+      .set('x-api-key', 'secure_key')
+      .set('x-business-id', 'my_shop');
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.manual).toBeDefined();
+    expect(res.body.manual.format).toBe('markdown');
+    expect(res.body.manual.title).toContain('USER MANUAL');
+    expect(res.body.manual.content).toContain('System Overview');
   });
 });

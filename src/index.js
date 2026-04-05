@@ -26,6 +26,7 @@ const analyticsRouter = require('./routes/analytics');
 const syncRouter = require('./routes/sync');
 const healthRouter = require('./routes/health');
 const webhooksRouter = require('./routes/webhooks');
+const systemAdminRouter = require('./routes/systemAdmin');
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use('/api/products', auth, productsRouter(productService));
 app.use('/api/brain', auth, brainRouter(brainAdminService));
 app.use('/api/analytics', auth, analyticsRouter(analyticsService));
 app.use('/api/sync', auth, syncRouter(productSyncService));
+app.use('/api/system-admin', auth, systemAdminRouter());
 app.use('/webhooks', webhooksRouter(orchestrator));
 
 if (config.productSyncIntervalSeconds > 0) {

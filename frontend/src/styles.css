@@ -76,6 +76,18 @@
   font-size: 12px;
 }
 
+.admin-manual {
+  white-space: pre-wrap;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px;
+  max-height: 420px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
