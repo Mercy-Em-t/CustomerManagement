@@ -25,7 +25,14 @@ class BrainLoader {
     const cached = this.cache.get(businessId);
     if (cached) return cached;
 
-    const brainPath = path.resolve(__dirname, '../../brains', `${businessId}.json`);
+    const brainsDir = path.resolve(__dirname, '../../brains');
+    // Use path.basename to strip any path separators before constructing the file path
+    const safeFileName = path.basename(businessId) + '.json';
+    const brainPath = path.join(brainsDir, safeFileName);
+    // Guard: ensure resolved path is inside the brains directory
+    if (!brainPath.startsWith(brainsDir + path.sep) && brainPath !== brainsDir) {
+      throw new Error(`Brain config not found for business: ${businessId}`);
+    }
     let raw;
     try {
       raw = await fs.readFile(brainPath, 'utf8');
