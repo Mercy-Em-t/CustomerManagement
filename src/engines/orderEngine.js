@@ -35,7 +35,7 @@ class OrderEngine {
   updateQuantity(userId, productId, quantity) {
     const cart = this.getCart(userId);
     const item = cart.items.find(i => i.product_id === productId);
-    if (!item) throw new Error(`Item ${productId} not found in cart`);
+    if (!item) throw new Error('The requested item was not found in your cart');
     if (quantity <= 0) {
       return this.removeItem(userId, productId);
     }

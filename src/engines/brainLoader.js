@@ -18,6 +18,10 @@ class BrainLoader {
   }
 
   async loadBrain(businessId) {
+    if (!/^[a-zA-Z0-9_-]+$/.test(businessId)) {
+      throw new Error(`Brain config not found for business: ${businessId}`);
+    }
+
     const cached = this.cache.get(businessId);
     if (cached) return cached;
 

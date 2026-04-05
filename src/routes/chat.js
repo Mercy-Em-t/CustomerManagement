@@ -17,6 +17,7 @@ module.exports = function chatRouter(orchestrator) {
       if (err.message && err.message.includes('Brain config not found')) {
         return res.status(404).json({ error: err.message });
       }
+      console.error('Chat handler error:', err.message);
       res.status(500).json({ error: 'Internal server error' });
     }
   });

@@ -1,4 +1,5 @@
 const SUPPORTED_INTENTS = require('./intentDetector').SUPPORTED_INTENTS;
+const config = require('../config');
 
 class AIEngine {
   buildPrompt(brain, userMessage, conversationHistory) {
@@ -28,8 +29,6 @@ Respond ONLY with valid JSON in this format:
   }
 
   async processMessage(brain, userMessage, conversationHistory) {
-    const config = require('../config');
-
     if (config.openaiApiKey) {
       return this._openAiResponse(brain, userMessage, conversationHistory, config.openaiApiKey);
     }

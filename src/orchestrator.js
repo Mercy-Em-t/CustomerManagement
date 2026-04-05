@@ -1,3 +1,5 @@
+const config = require('./config');
+
 class Orchestrator {
   constructor(brainLoader, aiEngine, orderEngine, memoryEngine, intentDetector) {
     this.brainLoader = brainLoader;
@@ -12,7 +14,6 @@ class Orchestrator {
     const brain = await this.brainLoader.loadBrain(businessId);
 
     // 2. Get conversation history
-    const config = require('./config');
     const history = this.memoryEngine.getHistory(userId, config.maxConversationHistory);
 
     // 3. Send to AI engine
