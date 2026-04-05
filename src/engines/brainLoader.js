@@ -1,6 +1,7 @@
 const NodeCache = require('node-cache');
 const fs = require('fs').promises;
 const path = require('path');
+const { isValidId } = require('../utils/validation');
 
 const REQUIRED_BRAIN_FIELDS = [
   'identity',
@@ -18,7 +19,7 @@ class BrainLoader {
   }
 
   async loadBrain(businessId) {
-    if (!/^[a-zA-Z0-9_-]+$/.test(businessId)) {
+    if (!isValidId(businessId)) {
       throw new Error(`Brain config not found for business: ${businessId}`);
     }
 

@@ -51,7 +51,9 @@ describe('BrainLoader', () => {
     try {
       await expect(loader.loadBrain('bad_json_brain')).rejects.toThrow();
     } finally {
-      await fs.unlink(badBrainPath).catch(() => {});
+      await fs.unlink(badBrainPath).catch((err) => {
+        console.error('Failed to clean up test brain file:', err.message);
+      });
     }
   });
 

@@ -9,7 +9,10 @@ const chatSchema = Joi.object({
 function sanitizeInput(str) {
   return str
     .replace(/[`]/g, "'")           // backticks can break code-block injection in prompts
-    .replace(/\{|\}/g, '')          // curly braces used in template-injection attacks
+    // Curly braces are blocked intentionally: they are the primary vector for template-injection
+    // attacks in LLM prompts (e.g. injecting {system} overrides). Trade-off: users cannot
+    // include literal braces in messages, which is acceptable for a sales chat interface.
+    .replace(/\{|\}/g, '')
     .replace(/<\|.*?\|>/g, '')      // special delimiters used by some LLM tokenizers (e.g. <|endoftext|>)
     .trim();
 }

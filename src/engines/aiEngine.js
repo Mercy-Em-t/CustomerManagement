@@ -66,13 +66,17 @@ Respond ONLY with valid JSON in this format:
               const content = parsed.choices[0].message.content;
               resolve(JSON.parse(content));
             } catch (e) {
-              console.error('Failed to parse OpenAI response, falling back to mock:', e.message);
+              const snippet = data.slice(0, 200);
+              console.error(`Failed to parse OpenAI response (${e.message}), content snippet: ${snippet}`);
               resolve(this._mockResponse(brain, userMessage));
             }
           });
         }
       );
-      req.on('error', () => resolve(this._mockResponse(brain, userMessage)));
+      req.on('error', (err) => {
+        console.error('OpenAI request error:', err.message);
+        resolve(this._mockResponse(brain, userMessage));
+      });
       req.write(body);
       req.end();
     });
