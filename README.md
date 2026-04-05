@@ -262,5 +262,4 @@ Set `OPENAI_API_KEY` in `.env`. The AI Engine will automatically use the OpenAI 
 - Brain Training (fine-tuning via conversations)
 - A/B Testing brains
 - Analytics dashboard (conversion rates, intent success)
-- WhatsApp API integration
 - M-Pesa / card payment integration

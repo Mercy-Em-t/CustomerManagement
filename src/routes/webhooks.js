@@ -11,9 +11,14 @@ module.exports = function webhooksRouter(orchestrator) {
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
+    const challengeStr = typeof challenge === 'string' ? challenge : '';
 
-    if (mode === 'subscribe' && token === config.whatsappVerifyToken) {
-      return res.status(200).send(challenge);
+    if (
+      mode === 'subscribe' &&
+      token === config.whatsappVerifyToken &&
+      /^[a-zA-Z0-9_-]{1,200}$/.test(challengeStr)
+    ) {
+      return res.status(200).type('text/plain').send(challengeStr);
     }
     return res.status(403).json({ error: 'Verification failed' });
   });
