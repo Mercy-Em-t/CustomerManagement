@@ -6,7 +6,9 @@ module.exports = function chatRouter(orchestrator) {
   router.post('/', inputValidator, async (req, res) => {
     try {
       const { message, user_id, business_id } = req.body;
-      const result = await orchestrator.handleMessage(business_id, user_id, message);
+      const resolvedBusinessId = (req.business && req.business.brainId) || req.businessId || business_id;
+      const resolvedUserId = user_id || `session_${Date.now()}`;
+      const result = await orchestrator.handleMessage(resolvedBusinessId, resolvedUserId, message);
       res.json({
         success: true,
         response: result.response,

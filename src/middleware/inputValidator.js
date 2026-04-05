@@ -2,8 +2,8 @@ const Joi = require('joi');
 
 const chatSchema = Joi.object({
   message: Joi.string().max(2000).required(),
-  user_id: Joi.string().required(),
-  business_id: Joi.string().required(),
+  user_id: Joi.string().allow('', null),
+  business_id: Joi.string().allow('', null),
 });
 
 function sanitizeInput(str) {

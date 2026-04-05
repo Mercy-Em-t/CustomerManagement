@@ -1,6 +1,6 @@
-const config = require('../config');
+const { resolveBusinessByAuth } = require('../services/authService');
 
-module.exports = function auth(req, res, next) {
+module.exports = async function auth(req, res, next) {
   const apiKey = req.headers['x-api-key'];
   const businessId = req.headers['x-business-id'];
 
@@ -8,11 +8,16 @@ module.exports = function auth(req, res, next) {
     return res.status(401).json({ error: 'Missing x-api-key or x-business-id header' });
   }
 
-  const expectedKey = config.apiKeys[businessId];
-  if (!expectedKey || expectedKey !== apiKey) {
-    return res.status(401).json({ error: 'Invalid API key for this business' });
-  }
+  try {
+    const business = await resolveBusinessByAuth(apiKey, businessId);
+    if (!business) {
+      return res.status(401).json({ error: 'Invalid API key for this business' });
+    }
 
-  req.businessId = businessId;
-  next();
+    req.businessId = business.id;
+    req.business = business;
+    next();
+  } catch (err) {
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 };

@@ -1,5 +1,6 @@
 const NodeCache = require('node-cache');
 const config = require('../config');
+const webhookDedupeStore = require('../services/webhookDedupeStore');
 
 const cache = new NodeCache({
   stdTTL: config.webhookDedupeTtlSeconds,
@@ -26,15 +27,18 @@ function collectMessageIds(body) {
   return ids;
 }
 
-module.exports = function webhookIdempotency(req, res, next) {
+module.exports = async function webhookIdempotency(req, res, next) {
   const ids = collectMessageIds(req.body);
   if (!ids.length) return next();
 
-  const duplicate = ids.some(id => cache.has(id));
+  const memoryDuplicate = ids.some(id => cache.has(id));
+  const dbDuplicate = await webhookDedupeStore.isDuplicate(ids).catch(() => false);
+  const duplicate = memoryDuplicate || dbDuplicate;
   if (duplicate) {
     return res.status(200).json({ success: true, duplicate: true });
   }
 
   ids.forEach(id => cache.set(id, true));
+  await webhookDedupeStore.markProcessed(ids).catch(() => {});
   next();
 };

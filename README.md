@@ -41,6 +41,7 @@ Loader             ↕
 ### Prerequisites
 - Node.js 18+
 - npm
+- PostgreSQL 14+ (optional for persistence)
 
 ### Installation
 
@@ -63,9 +64,14 @@ Key variables:
 | `PORT` | Server port | `3000` |
 | `NODE_ENV` | Environment | `development` |
 | `OPENAI_API_KEY` | OpenAI key (optional – falls back to mock) | — |
+| `DATABASE_URL` | PostgreSQL URL (enables DB-backed persistence/auth) | — |
+| `DATABASE_SSL` | Enable DB SSL connection | `false` |
+| `DB_POOL_MAX` | Max DB pool connections | `10` |
+| `DB_POOL_IDLE_TIMEOUT_MS` | DB idle timeout in ms | `30000` |
+| `DB_POOL_CONNECTION_TIMEOUT_MS` | DB connection timeout in ms | `5000` |
 | `BRAIN_CACHE_TTL` | Brain config cache in seconds | `300` |
 | `MAX_CONVERSATION_HISTORY` | Messages kept in session | `20` |
-| `API_KEYS` | Comma-separated `businessId:key` pairs | — |
+| `API_KEYS` | Comma-separated `businessId:key` pairs (fallback when DB disabled) | — |
 | `WHATSAPP_VERIFY_TOKEN` | Verify token for webhook challenge | — |
 | `WHATSAPP_APP_SECRET` | App secret for `x-hub-signature-256` verification | — |
 | `WHATSAPP_ACCESS_TOKEN` | WhatsApp Cloud API token for outbound replies | — |
@@ -84,6 +90,14 @@ npm run dev
 # Production
 npm start
 ```
+
+### Database Migrations
+
+```bash
+npm run migrate
+```
+
+Runs SQL migrations in `migrations/` in lexical order.
 
 ---
 
@@ -132,6 +146,30 @@ Confirm and checkout the current cart.
 ### DELETE `/api/orders/:userId/items/:productId`
 
 Remove an item from the cart.
+
+### POST `/api/orders/:userId/items/:productId`
+
+Add an item to cart (`quantity`, `price` in body).
+
+### PATCH `/api/orders/:userId/items/:productId`
+
+Update item quantity (`quantity` in body).
+
+### GET `/api/products`
+
+List products for the authenticated business.
+
+### GET `/api/products/:id`
+
+Get a single product for the authenticated business.
+
+### GET `/api/brain`
+
+Get brain metadata for the authenticated business.
+
+### POST `/api/brain`
+
+Validate submitted brain configuration payload.
 
 ### GET `/health`
 
@@ -216,7 +254,7 @@ Sample brains are included for:
 ## Security
 
 - **API key authentication** — per-tenant keys via `x-api-key` header
-- **Rate limiting** — 100 requests per 15 minutes per IP
+- **Rate limiting** — 100 requests per 15 minutes per API key (fallback to IP)
 - **Input validation** — Joi schema enforcement on all inputs
 - **Prompt injection protection** — sanitization of user input before LLM injection
 - **Path traversal prevention** — business IDs validated before file access
@@ -232,6 +270,7 @@ npm test
 Tests cover:
 - Brain Loader (load, cache, validate, error handling)
 - Order Engine (add/remove/update/checkout)
+- Webhooks (verification, idempotency, signature checks)
 
 ---
 
@@ -256,6 +295,13 @@ Only push to `main` for live, verified releases.
 
 ### Connect a real LLM
 Set `OPENAI_API_KEY` in `.env`. The AI Engine will automatically use the OpenAI API instead of the built-in mock responses.
+
+### Rollout Path (Design → Code)
+1. Set `DATABASE_URL` and run `npm run migrate`
+2. Seed `businesses` with `api_key` + `brain_file`
+3. Send `x-api-key` + `x-business-id` headers on API requests
+4. Verify chat/cart/products/brain routes in DB mode
+5. Keep `API_KEYS` only for fallback environments
 
 ### Planned Extensions
 - Brain Marketplace

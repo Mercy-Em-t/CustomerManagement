@@ -1,11 +1,12 @@
 const config = require('./config');
+const analyticsRepository = require('./db/repositories/analyticsRepository');
 
 class Orchestrator {
-  constructor(brainLoader, aiEngine, orderEngine, memoryEngine, intentDetector) {
+  constructor(brainLoader, aiEngine, orderEngine, memoryStore, intentDetector) {
     this.brainLoader = brainLoader;
     this.aiEngine = aiEngine;
     this.orderEngine = orderEngine;
-    this.memoryEngine = memoryEngine;
+    this.memoryStore = memoryStore;
     this.intentDetector = intentDetector;
   }
 
@@ -13,8 +14,9 @@ class Orchestrator {
     // 1. Load brain
     const brain = await this.brainLoader.loadBrain(businessId);
 
-    // 2. Get conversation history
-    const history = this.memoryEngine.getHistory(userId, config.maxConversationHistory);
+    // 2. Get/create conversation context + history
+    const context = await this.memoryStore.getOrCreateContext(businessId, userId);
+    const history = await this.memoryStore.getHistory(context, userId, config.maxConversationHistory);
 
     // 3. Send to AI engine
     const aiOutput = await this.aiEngine.processMessage(brain, message, history);
@@ -24,25 +26,22 @@ class Orchestrator {
     const entities = this.intentDetector.extractEntities(aiOutput);
 
     // 5. Update memory with user message and AI response
-    this.memoryEngine.addMessage(userId, 'user', message);
-    this.memoryEngine.addMessage(userId, 'assistant', aiOutput.response);
-    this.memoryEngine.updateIntent(userId, intent);
-
-    if (entities && Object.keys(entities).length > 0) {
-      this.memoryEngine.updatePreferences(userId, entities);
-    }
+    await this.memoryStore.addMessage(context, userId, 'user', message);
+    await this.memoryStore.addMessage(context, userId, 'assistant', aiOutput.response);
+    await this.memoryStore.updateState(context, userId, intent, entities);
 
     // 6. Handle purchase intent - add to cart if product entity present
     let cart = null;
     if (intent === 'purchase' && entities.product_id) {
-      this.orderEngine.addItem(userId, {
+      cart = await this.orderEngine.addItem(businessId, userId, {
         product_id: entities.product_id,
         name: entities.product_name || 'Product',
         quantity: entities.quantity || 1,
         price: entities.price || 0,
       });
-      cart = this.orderEngine.viewCart(userId);
     }
+
+    await analyticsRepository.trackIntent(businessId, intent, true);
 
     // 7. Return result
     return {
