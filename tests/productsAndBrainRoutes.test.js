@@ -3,6 +3,7 @@ const request = require('supertest');
 
 function buildApp() {
   const auth = require('../src/middleware/auth');
+  const rateLimiter = require('../src/middleware/rateLimiter');
   const productsRouter = require('../src/routes/products');
   const brainRouter = require('../src/routes/brain');
   const ProductService = require('../src/services/productService');
@@ -11,6 +12,7 @@ function buildApp() {
 
   const app = express();
   app.use(express.json());
+  app.use(rateLimiter);
 
   app.use('/api/products', auth, productsRouter(new ProductService()));
   app.use('/api/brain', auth, brainRouter(new BrainAdminService(new BrainLoader(60))));

@@ -39,6 +39,8 @@ module.exports = async function webhookIdempotency(req, res, next) {
   }
 
   ids.forEach(id => cache.set(id, true));
-  await webhookDedupeStore.markProcessed(ids).catch(() => {});
+  await webhookDedupeStore.markProcessed(ids).catch((err) => {
+    console.error('Webhook dedupe persistence error:', err.message);
+  });
   next();
 };

@@ -34,6 +34,7 @@ function parseInboundMessages(body) {
 
 function sendTextMessage(to, text) {
   if (!config.whatsappPhoneNumberId || !config.whatsappAccessToken) {
+    console.warn('WhatsApp outbound message skipped: missing WHATSAPP_PHONE_NUMBER_ID or WHATSAPP_ACCESS_TOKEN');
     return Promise.resolve({ skipped: true });
   }
 

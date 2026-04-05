@@ -31,7 +31,7 @@ class BrainLoader {
     const safeFileName = path.basename(businessId) + '.json';
     const brainPath = path.join(brainsDir, safeFileName);
     // Guard: ensure resolved path is inside the brains directory
-    if (!brainPath.startsWith(brainsDir + path.sep) && brainPath !== brainsDir) {
+    if (!brainPath.startsWith(brainsDir + path.sep)) {
       throw new Error(`Brain config not found for business: ${businessId}`);
     }
     let raw;

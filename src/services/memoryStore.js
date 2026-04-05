@@ -32,12 +32,13 @@ class MemoryStore {
     };
   }
 
-  async getHistory(context, userIdentifier) {
+  async getHistory(context, userIdentifier, limit) {
+    const historyLimit = Number.isFinite(Number(limit)) ? Number(limit) : this.maxHistory;
     if (!db.isDbEnabled() || context.mode === 'memory') {
-      return this.inMemoryEngine.getHistory(userIdentifier, this.maxHistory);
+      return this.inMemoryEngine.getHistory(userIdentifier, historyLimit);
     }
 
-    const rows = await messageRepository.getRecent(context.conversationId, this.maxHistory);
+    const rows = await messageRepository.getRecent(context.conversationId, historyLimit);
     return rows.map(row => ({
       role: row.sender === 'assistant' || row.sender === 'ai' ? 'assistant' : 'user',
       content: row.message,
