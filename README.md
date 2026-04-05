@@ -66,6 +66,14 @@ Key variables:
 | `BRAIN_CACHE_TTL` | Brain config cache in seconds | `300` |
 | `MAX_CONVERSATION_HISTORY` | Messages kept in session | `20` |
 | `API_KEYS` | Comma-separated `businessId:key` pairs | — |
+| `WHATSAPP_VERIFY_TOKEN` | Verify token for webhook challenge | — |
+| `WHATSAPP_APP_SECRET` | App secret for `x-hub-signature-256` verification | — |
+| `WHATSAPP_ACCESS_TOKEN` | WhatsApp Cloud API token for outbound replies | — |
+| `WHATSAPP_PHONE_NUMBER_ID` | Default phone number ID used for outbound send | — |
+| `WHATSAPP_PHONE_BUSINESS_MAP` | Comma-separated `phoneNumberId:businessId` map | — |
+| `WHATSAPP_DEFAULT_BUSINESS_ID` | Fallback tenant if map misses | — |
+| `WEBHOOK_DEDUPE_TTL_SECONDS` | Webhook idempotency TTL in seconds | `300` |
+| `WHATSAPP_API_VERSION` | Graph API version for WhatsApp endpoint | `v20.0` |
 
 ### Running
 
@@ -129,6 +137,18 @@ Remove an item from the cart.
 
 Health check endpoint (no auth required).
 
+### GET `/webhooks/whatsapp`
+
+Webhook verification endpoint for WhatsApp Cloud API challenge.
+
+### POST `/webhooks/whatsapp`
+
+Inbound WhatsApp messages endpoint. The server:
+- verifies webhook signatures (when app secret is configured)
+- deduplicates already-processed message IDs
+- maps inbound `phone_number_id` to tenant business
+- calls the orchestrator and sends assistant replies back to WhatsApp
+
 ---
 
 ## Brain Configuration
@@ -174,6 +194,7 @@ Each business gets a JSON brain file at `brains/{business_id}.json`:
 Sample brains are included for:
 - `demo_store` — General electronics/accessories retail
 - `health_shop` — Health & wellness superfoods store
+- `my_shop` — Live integration starter brain for first production tenant
 
 ---
 

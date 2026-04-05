@@ -15,10 +15,15 @@ const Orchestrator = require('./orchestrator');
 const chatRouter = require('./routes/chat');
 const ordersRouter = require('./routes/orders');
 const healthRouter = require('./routes/health');
+const webhooksRouter = require('./routes/webhooks');
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  },
+}));
 app.use(rateLimiter);
 
 // Instantiate engines
@@ -33,6 +38,7 @@ const orchestrator = new Orchestrator(brainLoader, aiEngine, orderEngine, memory
 app.use('/health', healthRouter);
 app.use('/api/chat', auth, chatRouter(orchestrator));
 app.use('/api/orders', auth, ordersRouter(orderEngine));
+app.use('/webhooks', webhooksRouter(orchestrator));
 
 // 404 handler
 app.use((req, res) => {

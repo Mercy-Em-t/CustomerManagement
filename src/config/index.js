@@ -8,6 +8,16 @@ function parseApiKeys(raw) {
   return map;
 }
 
+function parseColonMap(raw) {
+  const map = {};
+  if (!raw) return map;
+  raw.split(',').forEach(pair => {
+    const [left, right] = pair.trim().split(':');
+    if (left && right) map[left] = right;
+  });
+  return map;
+}
+
 module.exports = {
   port: parseInt(process.env.PORT, 10) || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -15,4 +25,12 @@ module.exports = {
   apiKeys: parseApiKeys(process.env.API_KEYS || ''),
   brainCacheTTL: parseInt(process.env.BRAIN_CACHE_TTL, 10) || 300,
   maxConversationHistory: parseInt(process.env.MAX_CONVERSATION_HISTORY, 10) || 20,
+  whatsappVerifyToken: process.env.WHATSAPP_VERIFY_TOKEN || '',
+  whatsappAppSecret: process.env.WHATSAPP_APP_SECRET || '',
+  whatsappAccessToken: process.env.WHATSAPP_ACCESS_TOKEN || '',
+  whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+  whatsappPhoneBusinessMap: parseColonMap(process.env.WHATSAPP_PHONE_BUSINESS_MAP || ''),
+  whatsappDefaultBusinessId: process.env.WHATSAPP_DEFAULT_BUSINESS_ID || '',
+  webhookDedupeTtlSeconds: parseInt(process.env.WEBHOOK_DEDUPE_TTL_SECONDS, 10) || 300,
+  whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v20.0',
 };
