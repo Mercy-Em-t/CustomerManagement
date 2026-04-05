@@ -382,3 +382,22 @@ Use `tests/stress_conversations.json` as a scripted pack of launch-critical conv
 - A/B Testing brains
 - Analytics dashboard (conversion rates, intent success)
 - M-Pesa / card payment integration
+
+### Notes: Brain Trainer + Conversion Optimizer (Next Build)
+
+Keep this as an implementation note for the next phase:
+
+- Add `modules/brain_trainer/` with:
+  - `conversation.store.js` (store per-shop conversation examples + metadata)
+  - `trainer.service.js` (build datasets from real conversations for fine-tuning/reinforcement workflows)
+  - `feedback.controller.js` (collect admin/customer feedback for continuous improvement)
+- Add `modules/conversion_optimizer/` with:
+  - `rules.json` (upsell, cross-sell, and nudge rules)
+  - `optimizer.service.js` (derive suggestions + nudges from cart and last product)
+- Integrate optimizer output into chat/order response payload so suggestions are returned with AI replies.
+- Connect brain-trainer loop to approved production storage and optional fine-tuning pipeline.
+- Future admin UI should expose:
+  - stored conversations
+  - approval of training samples
+  - conversion suggestion performance metrics
+  - conversion impact tracking over time
