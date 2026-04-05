@@ -1,0 +1,91 @@
+[
+  {
+    "id": "shop_001_flow_weight_loss_discovery",
+    "messages": [
+      "What do you have for weight loss?",
+      "I prefer tea and under 500 KES"
+    ],
+    "expected": {
+      "intent_in": ["product_search", "recommendation"],
+      "must_include_any": ["chia", "oats", "tea", "weight", "budget"],
+      "pass_fail": "PASS if response recommends at least 2 relevant in-stock products and includes one clear usage tip."
+    }
+  },
+  {
+    "id": "shop_001_flow_usage_help",
+    "messages": [
+      "How do I cook chia seeds?"
+    ],
+    "expected": {
+      "intent_in": ["usage_help"],
+      "must_include_any": ["soak", "water", "smoothie", "chia"],
+      "pass_fail": "PASS if response provides a practical method and suggests one complementary product."
+    }
+  },
+  {
+    "id": "shop_001_flow_add_to_cart",
+    "messages": [
+      "Add 2 packs of chia seeds"
+    ],
+    "expected": {
+      "intent_in": ["purchase"],
+      "cart_should_exist": true,
+      "pass_fail": "PASS if cart exists and quantity confirmation is explicit."
+    }
+  },
+  {
+    "id": "shop_001_flow_upsell_from_oats",
+    "messages": [
+      "I want oats"
+    ],
+    "expected": {
+      "intent_in": ["product_search", "recommendation", "purchase"],
+      "must_include_any": ["oats", "chia", "cinnamon", "seeds"],
+      "pass_fail": "PASS if response suggests at least one relevant upsell or cross-sell without being pushy."
+    }
+  },
+  {
+    "id": "shop_001_flow_out_of_stock",
+    "messages": [
+      "Is moringa still in stock?"
+    ],
+    "expected": {
+      "intent_in": ["product_search", "recommendation"],
+      "must_include_any": ["stock", "available", "alternative"],
+      "pass_fail": "PASS if response confirms stock status and provides one alternative when unavailable."
+    }
+  },
+  {
+    "id": "shop_001_flow_delivery_question",
+    "messages": [
+      "How long does delivery take to Nairobi?"
+    ],
+    "expected": {
+      "intent_in": ["logistics"],
+      "must_include_any": ["delivery", "days", "shipping"],
+      "pass_fail": "PASS if response gives clear timeline and next ordering step."
+    }
+  },
+  {
+    "id": "shop_001_flow_complaint",
+    "messages": [
+      "I got the wrong product in my order"
+    ],
+    "expected": {
+      "intent_in": ["complaint"],
+      "must_include_any": ["sorry", "help", "resolve"],
+      "pass_fail": "PASS if response apologizes, reassures, and provides a concrete resolution path."
+    }
+  },
+  {
+    "id": "shop_001_flow_checkout_confirmation",
+    "messages": [
+      "I want to checkout now"
+    ],
+    "expected": {
+      "intent_in": ["purchase"],
+      "must_include_any": ["checkout", "confirm", "quantity", "total"],
+      "pass_fail": "PASS if response requests or confirms final order details before payment handoff."
+    }
+  }
+]

@@ -1,0 +1,102 @@
+.app {
+  max-width: 420px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+}
+
+.chat-box {
+  height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  background: #fafafa;
+  margin-bottom: 10px;
+}
+
+.user {
+  text-align: right;
+  margin: 6px 0;
+}
+
+.ai {
+  text-align: left;
+  margin: 6px 0;
+}
+
+.recommendations {
+  font-size: 12px;
+  color: #334155;
+  margin-top: 4px;
+}
+
+.input-box {
+  display: flex;
+  gap: 8px;
+}
+
+.input-box input {
+  flex: 1;
+  padding: 8px;
+}
+
+.input-box button {
+  padding: 8px 12px;
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.table-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sync-status {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.brain-editor {
+  width: 100%;
+  min-height: 220px;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.admin-manual {
+  white-space: pre-wrap;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px;
+  max-height: 420px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: left;
+}

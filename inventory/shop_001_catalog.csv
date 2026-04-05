@@ -1,0 +1,13 @@
+external_id,name,description,price,stock,category,tags
+SHOP001-P001,Organic Chia Seeds 500g,High-fiber omega-3 seeds ideal for smoothies and porridge,650,140,seeds,weight-loss|fiber|omega-3|smoothies
+SHOP001-P002,Pumpkin Seeds 250g,Protein-rich roasted seeds great for snacking and salads,420,120,seeds,protein|snacks|salads|zinc
+SHOP001-P003,Sunflower Seeds 250g,Crunchy nutrient-dense seeds for healthy snacking,360,110,seeds,snacks|vitamin-e|heart-health
+SHOP001-P004,Whole Oats 1kg,Slow-release energy breakfast cereal for weight management,300,180,cereals,breakfast|weight-management|fiber
+SHOP001-P005,Rolled Oats 1kg,Quick-cook oats for porridge smoothies and baking,340,130,cereals,breakfast|quick-cook|meal-prep
+SHOP001-P006,Almonds 250g,Premium almonds high in healthy fats and protein,850,90,nuts,protein|healthy-fats|snacks
+SHOP001-P007,Peanuts 500g,Affordable high-protein nuts for snacks and toppings,280,160,nuts,protein|budget|snacks
+SHOP001-P008,Flax Seeds 250g,Omega-3 and fiber-rich seeds for digestion support,390,100,seeds,digestion|omega-3|fiber
+SHOP001-P009,Moringa Powder 250g,Nutrient-dense green powder for daily wellness blends,780,80,supplements,energy|immunity|greens
+SHOP001-P010,Hibiscus Tea 20 Bags,Caffeine-free antioxidant herbal tea for daily hydration,450,95,teas,herbal-tea|antioxidants|caffeine-free
+SHOP001-P011,Detox Green Tea 20 Bags,Light green tea blend that supports metabolism goals,420,100,teas,detox|metabolism|tea
+SHOP001-P012,Cinnamon Powder 100g,Aromatic spice for teas oats and healthy desserts,250,150,spices,metabolism|flavor|baking
